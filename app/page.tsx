@@ -1,65 +1,334 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { CONTRACTS, getContractPath } from '@/lib/contracts';
+import type { APIBatchResponse, ServiceProvider } from '@/types/api';
+
+// Field configuration for comparison table
+interface FieldConfig {
+  label: string;
+  extractors: Record<ServiceProvider, (contract: any) => string>;
+}
+
+const FIELD_CONFIGS: FieldConfig[] = [
+  {
+    label: 'Title / Contract Details',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_details ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_title ||
+        '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Title?.valueString || '—',
+    },
+  },
+  {
+    label: 'Contract ID',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_id || '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractId?.valueString || '—',
+    },
+  },
+  {
+    label: 'Parties',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.involved_parties ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.parties ||
+        '—',
+      azure: (contract) => {
+        const parties = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Parties?.valueArray;
+        if (!parties) return '—';
+        return parties
+          .map((p: any) => p.valueObject?.Name?.valueString)
+          .filter(Boolean)
+          .join(', ') || '—';
+      },
+    },
+  },
+  {
+    label: 'Effective Date',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.effective_date || '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.valueDate ||
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.content ||
+        '—',
+    },
+  },
+  {
+    label: 'Duration',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_duration || '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractDuration?.valueString || '—',
+    },
+  },
+  {
+    label: 'Contract Value',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_price ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_value ||
+        '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractValue?.valueString || '—',
+    },
+  },
+  {
+    label: 'Subject Matter',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.subject_matter ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.contract_object ||
+        '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.SubjectMatter?.valueString || '—',
+    },
+  },
+  {
+    label: 'Governing Law',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.governing_law || '—',
+      azure: (contract) => {
+        const jurisdictions = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Jurisdictions?.valueArray;
+        if (!jurisdictions) return '—';
+        return jurisdictions
+          .map((j: any) => j.valueObject?.Region?.valueString)
+          .filter(Boolean)
+          .join(', ') || '—';
+      },
+    },
+  },
+  {
+    label: 'Key Obligations',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.key_obligations ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.obligations ||
+        '—',
+      azure: () => '—',
+    },
+  },
+];
+
+const SERVICE_COLORS: Record<ServiceProvider, string> = {
+  extracta: 'text-blue-600 dark:text-blue-400',
+  azure: 'text-purple-600 dark:text-purple-400',
+};
+
+const SERVICES: ServiceProvider[] = ['extracta', 'azure'];
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<APIBatchResponse | { error: string } | null>(null);
+  const [selectedContracts, setSelectedContracts] = useState<string[]>(
+    CONTRACTS.map((c) => c.id)
+  );
+
+  const toggleContract = (contractId: string) => {
+    setSelectedContracts((prev) =>
+      prev.includes(contractId)
+        ? prev.filter((id) => id !== contractId)
+        : [...prev, contractId]
+    );
+  };
+
+  const runExtraction = async () => {
+    setLoading(true);
+    setResults(null);
+
+    try {
+      const response = await fetch('/api/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contractIds: selectedContracts,
+        }),
+      });
+
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      setResults({
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-zinc-50 p-8 dark:bg-zinc-950">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="mb-8 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+          Tecto — Contract Extraction Pipeline
+        </h1>
+
+        <div className="mb-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
+          <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            Contracts
+          </h2>
+          <div className="mb-4 space-y-2">
+            {CONTRACTS.map((contract) => {
+              const contractPath = getContractPath(contract.filename);
+              return (
+                <div
+                  key={contract.id}
+                  className="flex items-center justify-between rounded border border-zinc-200 p-3 dark:border-zinc-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedContracts.includes(contract.id)}
+                      onChange={() => toggleContract(contract.id)}
+                      className="h-4 w-4 rounded border-zinc-300"
+                    />
+                    <span className="font-mono text-sm text-zinc-700 dark:text-zinc-300">
+                      {contractPath}
+                    </span>
+                  </div>
+                  <a
+                    href={contractPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    View PDF
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={runExtraction}
+            disabled={loading || selectedContracts.length === 0}
+            className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:bg-zinc-400"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {loading
+              ? 'Running Extraction...'
+              : `Run All Services on ${selectedContracts.length} contract${selectedContracts.length !== 1 ? 's' : ''}`}
+          </button>
         </div>
-      </main>
+
+        {results && !('error' in results) && (
+          <>
+            {/* Comparison Table */}
+            <div className="mb-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
+              <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+                Service Comparison
+              </h2>
+              <div className="space-y-8">
+                {results.contracts.map((contract) => (
+                  <div key={contract.contractId} className="border-b border-zinc-200 pb-6 last:border-b-0 dark:border-zinc-700">
+                    <h3 className="mb-4 font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                      Contract: {contract.filename}
+                    </h3>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse text-sm">
+                        <thead>
+                          <tr className="border-b border-zinc-300 dark:border-zinc-600">
+                            <th className="p-3 text-left font-semibold text-zinc-700 dark:text-zinc-300">
+                              Field
+                            </th>
+                            {SERVICES.map((service) => (
+                              <th
+                                key={service}
+                                className={`p-3 text-left font-semibold capitalize ${SERVICE_COLORS[service]}`}
+                              >
+                                {service}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* Field Rows */}
+                          {FIELD_CONFIGS.map((field, idx) => (
+                            <tr
+                              key={field.label}
+                              className={idx < FIELD_CONFIGS.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-700' : ''}
+                            >
+                              <td className="p-3 font-medium text-zinc-600 dark:text-zinc-400">
+                                {field.label}
+                              </td>
+                              {SERVICES.map((service) => {
+                                const serviceResult = contract.services?.[service];
+                                const value = serviceResult?.status === 'success'
+                                  ? field.extractors[service](contract)
+                                  : serviceResult?.status === 'error'
+                                  ? '—'
+                                  : '—';
+
+                                return (
+                                  <td key={service} className="p-3 text-zinc-900 dark:text-zinc-100">
+                                    {field.label === 'Key Obligations' ? (
+                                      <div className="max-w-md truncate">{value}</div>
+                                    ) : (
+                                      value
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+
+                          {/* Latency Row */}
+                          <tr>
+                            <td className="p-3 font-medium text-zinc-600 dark:text-zinc-400">
+                              Response Time
+                            </td>
+                            {SERVICES.map((service) => {
+                              const latencyMs = contract.services?.[service]?.latencyMs;
+                              return (
+                                <td key={service} className="p-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                                  {latencyMs
+                                    ? `${latencyMs}ms (${(latencyMs / 1000).toFixed(1)}s)`
+                                    : '—'}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Raw Responses */}
+            <div className="rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
+              <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+                Raw API Responses (truncated)
+              </h2>
+              <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+                Strings limited to 100 characters, arrays limited to 10 items
+              </div>
+              <pre className="overflow-auto rounded bg-zinc-100 p-4 text-xs dark:bg-zinc-950">
+                {JSON.stringify(results, null, 2)}
+              </pre>
+            </div>
+          </>
+        )}
+
+        {results && 'error' in results && (
+          <div className="rounded-lg bg-red-50 p-6 dark:bg-red-900/20">
+            <h2 className="mb-2 text-xl font-semibold text-red-900 dark:text-red-200">
+              Error
+            </h2>
+            <p className="text-red-700 dark:text-red-300">{results.error}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
