@@ -4,9 +4,16 @@ import { useState } from 'react';
 import { CONTRACTS, getContractPath } from '@/lib/contracts';
 import { Navigation } from '@/components/navigation';
 import type { APIBatchResponse, APIContractResult, ServiceProvider } from '@/types/api';
-import type { AzureObjectField } from '@/types/services/azure';
+import type { AzureObjectField, AzureFieldTypes } from '@/types/services/azure';
 
-// Field configuration for comparison table
+function getAzureFieldValue(field: AzureFieldTypes | undefined): string | undefined {
+  if (!field) return undefined;
+  if ('valueString' in field) return field.valueString;
+  if ('valueDate' in field) return field.valueDate;
+  if ('content' in field) return field.content;
+  return undefined;
+}
+
 interface FieldConfig {
   label: string;
   extractors: Record<ServiceProvider, (contract: APIContractResult) => string>;
@@ -20,7 +27,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
         contract.services?.extracta?.data?.files?.[0]?.result?.Title ||
         '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Title?.valueString || '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Title) || '—',
     },
   },
   {
@@ -29,7 +36,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.ContractId || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractId?.valueString || '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractId) || '—',
     },
   },
   {
@@ -39,7 +46,9 @@ const FIELD_CONFIGS: FieldConfig[] = [
         contract.services?.extracta?.data?.files?.[0]?.result?.Parties ||
         '—',
       azure: (contract) => {
-        const parties = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Parties?.valueArray;
+        const partiesField = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Parties;
+        if (!partiesField || !('valueArray' in partiesField)) return '—';
+        const parties = partiesField.valueArray;
         if (!parties) return '—';
         return parties
           .map((p: AzureObjectField) => {
@@ -57,9 +66,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.EffectiveDate || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.valueDate ||
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.content ||
-        '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate) || '—',
     },
   },
   {
@@ -68,9 +75,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.ExecutionDate || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExecutionDate?.valueDate ||
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExecutionDate?.content ||
-        '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExecutionDate) || '—',
     },
   },
   {
@@ -79,9 +84,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.ExpirationDate || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExpirationDate?.valueDate ||
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExpirationDate?.content ||
-        '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExpirationDate) || '—',
     },
   },
   {
@@ -90,7 +93,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.ContractDuration || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractDuration?.content || '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractDuration) || '—',
     },
   },
   {
@@ -99,9 +102,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.RenewalDate || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.RenewalDate?.valueDate ||
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.RenewalDate?.content ||
-        '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.RenewalDate) || '—',
     },
   },
   {
@@ -110,7 +111,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
       extracta: (contract) =>
         contract.services?.extracta?.data?.files?.[0]?.result?.Jurisdictions || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Jurisdictions?.content || '—',
+        getAzureFieldValue(contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Jurisdictions) || '—',
     },
   },
 ];

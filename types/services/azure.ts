@@ -1,7 +1,3 @@
-/**
- * Azure Document Intelligence API Response Types
- */
-
 export interface AzureResponse {
   status: 'succeeded' | 'running' | 'failed';
   createdDateTime: string;
@@ -69,10 +65,6 @@ export interface AzureDocument {
   spans: AzureSpan[];
 }
 
-/**
- * Azure Document Intelligence returns PascalCase fields
- * We use an index signature to allow any field, as Azure may return additional fields
- */
 export type AzureContractFields = {
   [key: string]: AzureFieldTypes | undefined;
 };

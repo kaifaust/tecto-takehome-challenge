@@ -1,21 +1,12 @@
-/**
- * AI-powered evaluation using Claude for more lenient and intelligent comparison
- */
-
 import { anthropicClient, ANTHROPIC_MODEL } from '@/lib/anthropic-client';
 import type { ContractFields } from '@/types/api';
 
 interface AIEvaluationResult {
-  fieldResults: Record<string, boolean>; // true = pass, false = fail
+  fieldResults: Record<string, boolean>;
   reasoning: string;
-  fieldReasonings?: Record<string, string>; // Per-field reasoning
+  fieldReasonings?: Record<string, string>;
 }
 
-/**
- * Use Claude to evaluate accuracy with more lenient comparison
- * Handles variations in wording, date formats, and semantic equivalence
- * Wrong answers and missing answers are both treated as incorrect
- */
 export async function evaluateAccuracyWithAI(
   extracted: ContractFields,
   gold: ContractFields
@@ -50,7 +41,7 @@ Example format:
     const response = await anthropicClient.messages.create({
       model: ANTHROPIC_MODEL,
       max_tokens: 2000,
-      temperature: 0, // Deterministic evaluation
+      temperature: 0,
       messages: [
         {
           role: 'user',
@@ -64,16 +55,12 @@ Example format:
       throw new Error('Unexpected response type from Claude');
     }
 
-    // Extract JSON from response, handling markdown code blocks if present
     let jsonText = content.text.trim();
 
-    // Remove markdown code blocks if present
     if (jsonText.startsWith('```')) {
-      // Remove ```json or ``` at start and ``` at end
       jsonText = jsonText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
     }
 
-    // Find JSON object
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error(`No JSON object found in response: ${jsonText.substring(0, 100)}`);
@@ -88,7 +75,6 @@ Example format:
     };
   } catch (error) {
     console.error('AI evaluation error:', error);
-    // Fallback to all fails on error
     return {
       fieldResults: {},
       reasoning: `AI evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,

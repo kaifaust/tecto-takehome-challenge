@@ -1,17 +1,3 @@
-/**
- * Centralized contract field schema
- * Single source of truth for all contract data extraction fields
- */
-
-// ============================================
-// Contract Field Definitions
-// ============================================
-
-/**
- * Contract field keys used across all services
- * LIMITED TO AZURE'S NATIVE FIELDS ONLY (for fair comparison)
- * Azure prebuilt-contract supports these 9 fields (as of 2024-11-30 GA)
- */
 export const CONTRACT_FIELD_KEYS = [
   'contractId',
   'title',
@@ -26,22 +12,10 @@ export const CONTRACT_FIELD_KEYS = [
 
 export type ContractFieldKey = (typeof CONTRACT_FIELD_KEYS)[number];
 
-/**
- * Unified contract field values (camelCase for TS)
- * Fields can be string, null (explicitly absent in source), or undefined (not yet processed)
- */
 export type ContractFields = {
   [K in ContractFieldKey]?: string | null;
 };
 
-// ============================================
-// Service-Specific Field Mappings
-// ============================================
-
-/**
- * Azure Document Intelligence prebuilt-contract field names (PascalCase)
- * These are the ONLY fields that Azure's prebuilt contract model returns
- */
 export const AZURE_FIELD_NAMES: Record<ContractFieldKey, string> = {
   contractId: 'ContractId',
   title: 'Title',
@@ -54,11 +28,6 @@ export const AZURE_FIELD_NAMES: Record<ContractFieldKey, string> = {
   jurisdictions: 'Jurisdictions',
 } as const;
 
-/**
- * Extracta.ai field names to request
- * We use simple PascalCase names matching Azure to keep them aligned
- * Extracta will convert these to snake_case in responses (e.g., "Parties" → "parties")
- */
 export const EXTRACTA_FIELD_NAMES: Record<ContractFieldKey, string> = {
   contractId: 'ContractId',
   title: 'Title',
@@ -71,21 +40,10 @@ export const EXTRACTA_FIELD_NAMES: Record<ContractFieldKey, string> = {
   jurisdictions: 'Jurisdictions',
 } as const;
 
-// ============================================
-// Helper Functions
-// ============================================
-
-/**
- * Get Azure query fields as comma-separated string for API
- */
 export function getAzureQueryFields(): string {
   return CONTRACT_FIELD_KEYS.map((key) => AZURE_FIELD_NAMES[key]).join(',');
 }
 
-/**
- * Get Extracta field definitions for extraction creation
- * Descriptions must be simple and match Azure's field semantics
- */
 export function getExtractaFieldDefinitions(): Array<{
   key: string;
   type: string;

@@ -1,7 +1,3 @@
-/**
- * Extracta.ai API Client
- */
-
 import { env } from '@/lib/env';
 import type { ExtractaResponse } from '@/types/services/extracta';
 
@@ -36,9 +32,6 @@ export class ExtractaClient {
     return response.json();
   }
 
-  /**
-   * Get batch results for a specific extraction
-   */
   async getBatchResults(
     extractionId: string,
     batchId: string,
@@ -54,10 +47,6 @@ export class ExtractaClient {
     });
   }
 
-  /**
-   * Create a new extraction
-   * If fields are not provided, defaults to the standard contract fields
-   */
   async createExtraction(config: {
     name: string;
     description?: string;
@@ -69,7 +58,6 @@ export class ExtractaClient {
       example?: string;
     }>;
   }): Promise<{ extractionId: string }> {
-    // Import here to avoid circular dependencies
     const { getExtractaFieldDefinitions } = await import('@/lib/contract-schema');
 
     return this.request<{ extractionId: string }>('/createExtraction', {
@@ -85,22 +73,17 @@ export class ExtractaClient {
     });
   }
 
-  /**
-   * Upload file buffer to an extraction batch (server)
-   */
   async uploadFileBuffer(
     extractionId: string,
     batchId: string,
     fileBuffer: Buffer,
     filename: string
   ): Promise<{ batchId: string }> {
-    // Node.js FormData from buffer
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const FormData = require('form-data');
     const formData = new FormData();
 
     formData.append('extractionId', extractionId);
-    // Only append batchId if it's provided (non-empty)
     if (batchId) {
       formData.append('batchId', batchId);
     }

@@ -1,7 +1,3 @@
-/**
- * Azure Document Intelligence API Client
- */
-
 import { env } from '@/lib/env';
 import type { AzureResponse } from '@/types/services/azure';
 
@@ -12,13 +8,9 @@ export class AzureDocumentIntelligenceClient {
 
   constructor() {
     this.key = env.azure.key;
-    this.endpoint = env.azure.endpoint.replace(/\/$/, ''); // Remove trailing slash
+    this.endpoint = env.azure.endpoint.replace(/\/$/, '');
   }
 
-  /**
-   * Analyze a contract document from file buffer
-   * NOTE: Query fields don't work with prebuilt-contract model (only with prebuilt-layout)
-   */
   async analyzeContractFromBuffer(
     fileBuffer: Buffer
   ): Promise<{ operationId: string; operationLocation: string }> {
@@ -40,13 +32,11 @@ export class AzureDocumentIntelligenceClient {
       );
     }
 
-    // Azure returns the operation location in the headers
     const operationLocation = response.headers.get('Operation-Location');
     if (!operationLocation) {
       throw new Error('No Operation-Location header in response');
     }
 
-    // Extract operation ID from the location URL
     const operationId = operationLocation.split('/').pop()?.split('?')[0] || '';
 
     return {
@@ -55,9 +45,6 @@ export class AzureDocumentIntelligenceClient {
     };
   }
 
-  /**
-   * Get analysis result by operation location
-   */
   async getAnalysisResult(operationLocation: string): Promise<AzureResponse> {
     const response = await fetch(operationLocation, {
       method: 'GET',
@@ -76,9 +63,6 @@ export class AzureDocumentIntelligenceClient {
     return response.json();
   }
 
-  /**
-   * Poll for analysis completion
-   */
   async waitForAnalysis(
     operationLocation: string,
     maxAttempts = 30,
@@ -95,7 +79,6 @@ export class AzureDocumentIntelligenceClient {
         throw new Error('Azure analysis failed');
       }
 
-      // Wait before next poll
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 

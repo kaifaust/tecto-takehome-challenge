@@ -1,7 +1,3 @@
-/**
- * Normalize Q&A extraction results from both APIs into a unified schema for eval
- */
-
 import type { ContractFields, ServiceProvider } from '@/types/api';
 import type { AzureResponse } from '@/types/services/azure';
 import type { ExtractaResponse } from '@/types/services/extracta';
@@ -12,50 +8,48 @@ import {
   type ContractFieldKey,
 } from '@/lib/contract-schema';
 
-// ============================================
-// Unified Q&A Schema for Eval Pipeline
-// ============================================
-
 export interface NormalizedQA {
   source: ServiceProvider;
   answers: ContractFields;
 }
 
-// ============================================
-// Normalization Functions
-// ============================================
+function extractAzureFieldValue(field: unknown): string | undefined {
+  if (!field || typeof field !== 'object') return undefined;
 
-/**
- * Extract string value from Azure field
- */
-function extractAzureFieldValue(field: any): string | undefined {
-  if (!field) return undefined;
+  const fieldObj = field as Record<string, unknown>;
 
-  // Handle array types (Parties, Jurisdictions)
-  if (field.type === 'array' && field.valueArray) {
+  if (fieldObj.type === 'array' && Array.isArray(fieldObj.valueArray)) {
     const items: string[] = [];
-    for (const item of field.valueArray) {
-      if (item.type === 'object' && item.valueObject) {
-        // For Parties: extract Name field
-        if (item.valueObject.Name?.content) {
-          items.push(item.valueObject.Name.content);
-        }
-        // For Jurisdictions: extract Region field
-        if (item.valueObject.Region?.content) {
-          items.push(item.valueObject.Region.content);
+    for (const item of fieldObj.valueArray) {
+      if (typeof item === 'object' && item !== null) {
+        const itemObj = item as Record<string, unknown>;
+        if (itemObj.type === 'object' && typeof itemObj.valueObject === 'object' && itemObj.valueObject !== null) {
+          const valueObject = itemObj.valueObject as Record<string, unknown>;
+          if (typeof valueObject.Name === 'object' && valueObject.Name !== null) {
+            const nameField = valueObject.Name as Record<string, unknown>;
+            if (typeof nameField.content === 'string') {
+              items.push(nameField.content);
+            }
+          }
+          if (typeof valueObject.Region === 'object' && valueObject.Region !== null) {
+            const regionField = valueObject.Region as Record<string, unknown>;
+            if (typeof regionField.content === 'string') {
+              items.push(regionField.content);
+            }
+          }
         }
       }
     }
     return items.length > 0 ? items.join(', ') : undefined;
   }
 
-  // Handle simple string/date fields
-  return field.content || field.valueString || field.valueDate;
+  const content = typeof fieldObj.content === 'string' ? fieldObj.content : undefined;
+  const valueString = typeof fieldObj.valueString === 'string' ? fieldObj.valueString : undefined;
+  const valueDate = typeof fieldObj.valueDate === 'string' ? fieldObj.valueDate : undefined;
+
+  return content || valueString || valueDate;
 }
 
-/**
- * Normalize Azure Document Intelligence response to Q&A format
- */
 export function normalizeAzureResponse(response: AzureResponse): NormalizedQA {
   const doc = response.analyzeResult.documents[0];
   if (!doc) {
@@ -65,15 +59,10 @@ export function normalizeAzureResponse(response: AzureResponse): NormalizedQA {
   const fields = doc.fields;
   const answers: ContractFields = {};
 
-  // Map each standard field using the centralized schema
   CONTRACT_FIELD_KEYS.forEach((key: ContractFieldKey) => {
     const azureFieldName = AZURE_FIELD_NAMES[key];
     const azureField = fields[azureFieldName];
-
-    // Just extract the value - Azure already did the hard work
     const value = extractAzureFieldValue(azureField as never);
-
-    // Convert undefined to null for consistent JSON serialization
     answers[key] = value === undefined ? null : value;
   });
 
@@ -83,9 +72,6 @@ export function normalizeAzureResponse(response: AzureResponse): NormalizedQA {
   };
 }
 
-/**
- * Normalize Extracta.ai response to Q&A format
- */
 export function normalizeExtractaResponse(
   response: ExtractaResponse
 ): NormalizedQA {
@@ -97,12 +83,9 @@ export function normalizeExtractaResponse(
   const data = file.result;
   const answers: ContractFields = {};
 
-  // Map each standard field using the centralized schema
   CONTRACT_FIELD_KEYS.forEach((key: ContractFieldKey) => {
     const extractaFieldName = EXTRACTA_FIELD_NAMES[key];
     const value = data[extractaFieldName];
-
-    // Convert undefined to null for consistent JSON serialization
     answers[key] = value === undefined ? null : value;
   });
 

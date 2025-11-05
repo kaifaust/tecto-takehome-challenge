@@ -6,10 +6,6 @@ import { Navigation } from '@/components/navigation';
 import type { ServiceProvider } from '@/types/api';
 import type { AllMetrics } from '@/lib/evaluation';
 
-// ============================================
-// Types
-// ============================================
-
 interface EvaluationResult {
   contractId: string;
   service: ServiceProvider;
@@ -32,11 +28,6 @@ interface EvaluationReport {
     azure: AggregateMetrics;
   };
 }
-
-// ============================================
-// Components
-// ============================================
-
 
 function ServiceComparisonTable({
   gold,
@@ -183,10 +174,6 @@ function ServiceComparisonTable({
     </div>
   );
 }
-
-// ============================================
-// Main Page Component
-// ============================================
 
 export default function BenchmarkPage() {
   const [loading, setLoading] = useState(false);
