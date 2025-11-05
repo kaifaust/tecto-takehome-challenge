@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "description": "Sample contract documents for evaluation",
+  "totalSamples": 3,
+  "samples": [
+    {
+      "id": "01",
+      "filename": "01.md",
+      "title": "Cloud Services Agreement",
+      "documentType": "Cloud Services Agreement",
+      "sourcePath": "public/data/contracts/raw/01.md",
+      "pageCount": 2,
+      "estimatedTokens": 8500,
+      "characteristics": [
+        "Enterprise cloud services contract",
+        "Multi-year commitment with reserved instances",
+        "Complex SLA structure with service credits",
+        "Multi-jurisdiction data residency requirements",
+        "Extensive compliance obligations (SOC 2, ISO 27001, PCI DSS, GDPR)"
+      ],
+      "notes": "Comprehensive enterprise agreement between cloud provider and multinational banking institution. Features detailed technical specifications, disaster recovery terms, and regulatory compliance requirements."
+    },
+    {
+      "id": "02",
+      "filename": "02.md",
+      "title": "Master Services Agreement for Security Assessment Services",
+      "documentType": "Security Services Agreement",
+      "sourcePath": "public/data/contracts/raw/02.md",
+      "pageCount": 2,
+      "estimatedTokens": 9200,
+      "characteristics": [
+        "Cybersecurity penetration testing services",
+        "Detailed rules of engagement and prohibited activities",
+        "Complex fee structure with multiple service types",
+        "Extensive liability and indemnification clauses",
+        "Multiple facility locations across continents"
+      ],
+      "notes": "Master services agreement for pharmaceutical company's security assessment program. Includes quarterly external testing, annual internal assessments, and social engineering campaigns with strict compliance requirements."
+    },
+    {
+      "id": "03",
+      "filename": "03.md",
+      "title": "Enterprise Services Agreement",
+      "documentType": "HR/Payroll Services Agreement",
+      "sourcePath": "public/data/contracts/raw/03.md",
+      "pageCount": 3,
+      "estimatedTokens": 37000,
+      "characteristics": [
+        "Multi-country payroll and HRIS services (6 countries)",
+        "Complex tiered per-employee-per-month pricing structure",
+        "Tax compliance guarantee with penalty reimbursement",
+        "Comprehensive benefits administration and time tracking",
+        "12-week implementation with dual-run period"
+      ],
+      "notes": "Enterprise services agreement for SaaS company with 8,500 employees across US, Canada, UK, Germany, India, and Australia. Comprehensive payroll processing, HRIS, benefits administration, and compliance services with multi-jurisdictional requirements."
+    }
+  ]
+}

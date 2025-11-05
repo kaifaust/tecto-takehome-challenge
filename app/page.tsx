@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { CONTRACTS, getContractPath } from '@/lib/contracts';
-import type { APIBatchResponse, ServiceProvider } from '@/types/api';
+import { Navigation } from '@/components/navigation';
+import type { APIBatchResponse, APIContractResult, ServiceProvider } from '@/types/api';
+import type { AzureObjectField } from '@/types/services/azure';
 
 // Field configuration for comparison table
 interface FieldConfig {
   label: string;
-  extractors: Record<ServiceProvider, (contract: any) => string>;
+  extractors: Record<ServiceProvider, (contract: APIContractResult) => string>;
 }
 
 const FIELD_CONFIGS: FieldConfig[] = [
@@ -15,8 +17,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
     label: 'Title / Contract Details',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_details ||
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_title ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.Title ||
         '—',
       azure: (contract) =>
         contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Title?.valueString || '—',
@@ -26,7 +27,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
     label: 'Contract ID',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_id || '—',
+        contract.services?.extracta?.data?.files?.[0]?.result?.ContractId || '—',
       azure: (contract) =>
         contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractId?.valueString || '—',
     },
@@ -35,14 +36,16 @@ const FIELD_CONFIGS: FieldConfig[] = [
     label: 'Parties',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.involved_parties ||
-        contract.services?.extracta?.data?.files?.[0]?.result?.parties ||
+        contract.services?.extracta?.data?.files?.[0]?.result?.Parties ||
         '—',
       azure: (contract) => {
         const parties = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Parties?.valueArray;
         if (!parties) return '—';
         return parties
-          .map((p: any) => p.valueObject?.Name?.valueString)
+          .map((p: AzureObjectField) => {
+            const nameField = p.valueObject?.Name;
+            return nameField && 'valueString' in nameField ? nameField.valueString : undefined;
+          })
           .filter(Boolean)
           .join(', ') || '—';
       },
@@ -52,7 +55,7 @@ const FIELD_CONFIGS: FieldConfig[] = [
     label: 'Effective Date',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.effective_date || '—',
+        contract.services?.extracta?.data?.files?.[0]?.result?.EffectiveDate || '—',
       azure: (contract) =>
         contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.valueDate ||
         contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.EffectiveDate?.content ||
@@ -60,59 +63,54 @@ const FIELD_CONFIGS: FieldConfig[] = [
     },
   },
   {
+    label: 'Execution Date',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.ExecutionDate || '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExecutionDate?.valueDate ||
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExecutionDate?.content ||
+        '—',
+    },
+  },
+  {
+    label: 'Expiration Date',
+    extractors: {
+      extracta: (contract) =>
+        contract.services?.extracta?.data?.files?.[0]?.result?.ExpirationDate || '—',
+      azure: (contract) =>
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExpirationDate?.valueDate ||
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ExpirationDate?.content ||
+        '—',
+    },
+  },
+  {
     label: 'Duration',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_duration || '—',
+        contract.services?.extracta?.data?.files?.[0]?.result?.ContractDuration || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractDuration?.valueString || '—',
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractDuration?.content || '—',
     },
   },
   {
-    label: 'Contract Value',
+    label: 'Renewal Date',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_price ||
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_value ||
-        '—',
+        contract.services?.extracta?.data?.files?.[0]?.result?.RenewalDate || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.ContractValue?.valueString || '—',
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.RenewalDate?.valueDate ||
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.RenewalDate?.content ||
+        '—',
     },
   },
   {
-    label: 'Subject Matter',
+    label: 'Jurisdictions',
     extractors: {
       extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.subject_matter ||
-        contract.services?.extracta?.data?.files?.[0]?.result?.contract_object ||
-        '—',
+        contract.services?.extracta?.data?.files?.[0]?.result?.Jurisdictions || '—',
       azure: (contract) =>
-        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.SubjectMatter?.valueString || '—',
-    },
-  },
-  {
-    label: 'Governing Law',
-    extractors: {
-      extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.governing_law || '—',
-      azure: (contract) => {
-        const jurisdictions = contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Jurisdictions?.valueArray;
-        if (!jurisdictions) return '—';
-        return jurisdictions
-          .map((j: any) => j.valueObject?.Region?.valueString)
-          .filter(Boolean)
-          .join(', ') || '—';
-      },
-    },
-  },
-  {
-    label: 'Key Obligations',
-    extractors: {
-      extracta: (contract) =>
-        contract.services?.extracta?.data?.files?.[0]?.result?.key_obligations ||
-        contract.services?.extracta?.data?.files?.[0]?.result?.obligations ||
-        '—',
-      azure: () => '—',
+        contract.services?.azure?.data?.analyzeResult?.documents?.[0]?.fields?.Jurisdictions?.content || '—',
     },
   },
 ];
@@ -168,9 +166,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 p-8 dark:bg-zinc-950">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-8 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
           Tecto — Contract Extraction Pipeline
         </h1>
+        <p className="mb-6 text-zinc-600 dark:text-zinc-400">
+          Extract contract fields using Extracta.ai and Azure Document Intelligence
+        </p>
+
+        <Navigation />
 
         <div className="mb-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
           <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -270,11 +273,7 @@ export default function Home() {
 
                                 return (
                                   <td key={service} className="p-3 text-zinc-900 dark:text-zinc-100">
-                                    {field.label === 'Key Obligations' ? (
-                                      <div className="max-w-md truncate">{value}</div>
-                                    ) : (
-                                      value
-                                    )}
+                                    {value}
                                   </td>
                                 );
                               })}

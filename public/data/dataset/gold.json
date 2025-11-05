@@ -1,0 +1,48 @@
+{
+  "version": "3.0.0",
+  "description": "Ground truth labels for contract extraction evaluation. Limited to Azure's 9 native fields for fair comparison.",
+  "goldLabels": [
+    {
+      "contractId": "01",
+      "fields": {
+        "contractId": "CSA-2025-MFG-ST-001",
+        "title": "Cloud Services Agreement",
+        "parties": "StratusCloud Technologies Inc., Meridian Financial Group",
+        "effectiveDate": "January 1, 2026",
+        "executionDate": "January 1, 2026",
+        "expirationDate": "January 1, 2029",
+        "contractDuration": "Three (3) Years",
+        "renewalDate": null,
+        "jurisdictions": "England and Wales"
+      }
+    },
+    {
+      "contractId": "02",
+      "fields": {
+        "contractId": null,
+        "title": "Master Services Agreement for Security Assessment Services",
+        "parties": "Apex Pharmaceuticals LLC, CyberShield Security Consultants Ltd.",
+        "effectiveDate": "January 1, 2026",
+        "executionDate": null,
+        "expirationDate": "December 31, 2026",
+        "contractDuration": "12 months",
+        "renewalDate": null,
+        "jurisdictions": "Commonwealth of Massachusetts"
+      }
+    },
+    {
+      "contractId": "03",
+      "fields": {
+        "contractId": null,
+        "title": "Enterprise Services Agreement",
+        "parties": "TechVista Corporation, GlobalHR Solutions Inc.",
+        "effectiveDate": "January 15, 2026",
+        "executionDate": null,
+        "expirationDate": "January 15, 2029",
+        "contractDuration": "three (3) years",
+        "renewalDate": null,
+        "jurisdictions": "State of California"
+      }
+    }
+  ]
+}

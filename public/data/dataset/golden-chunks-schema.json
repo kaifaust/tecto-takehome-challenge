@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Golden Chunks Schema",
+  "description": "Schema for metric-tagged evaluation chunks. Each chunk tests a specific metric (Correctness or Latency).",
+  "version": "2.0.0",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this golden chunk set"
+    },
+    "chunks": {
+      "type": "array",
+      "description": "Array of golden evaluation chunks",
+      "items": {
+        "type": "object",
+        "required": ["id", "contractId", "metric", "question", "expectedAnswer"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this chunk (e.g., 'GC-01-C-001' for Correctness, 'GC-01-L-001' for Latency)",
+            "pattern": "^GC-\\d{2}-[CL]-\\d{3}$",
+            "examples": ["GC-01-C-001", "GC-02-L-001"]
+          },
+          "contractId": {
+            "type": "string",
+            "description": "Which contract this chunk is from",
+            "examples": ["01", "02", "03"]
+          },
+          "metric": {
+            "type": "string",
+            "enum": ["Correctness", "Latency"],
+            "description": "Which metric this chunk tests"
+          },
+          "question": {
+            "type": "string",
+            "description": "The evaluation question or extraction task",
+            "examples": [
+              "What is the contract number?",
+              "When does this agreement become effective?",
+              "What is the SLA uptime commitment?"
+            ]
+          },
+          "contextChunk": {
+            "type": "string",
+            "description": "Optional: Specific text snippet from the contract relevant to this question. If omitted, the entire contract is the context.",
+            "examples": [
+              "**Agreement Number:** CSA-2025-MFG-ST-001",
+              "**Effective Date:** January 1, 2026"
+            ]
+          },
+          "expectedAnswer": {
+            "type": ["string", "array", "object"],
+            "description": "The golden/correct answer to the question",
+            "examples": [
+              "CSA-2025-MFG-ST-001",
+              "January 1, 2026",
+              "99.99%",
+              ["StratusCloud Technologies Inc.", "Meridian Financial Group"]
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": ["easy", "medium", "hard"],
+            "description": "Difficulty level of this extraction task",
+            "default": "medium"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about why this chunk tests the specific metric or any edge cases"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags for categorization (e.g., 'date', 'party', 'financial', 'sla')"
+          }
+        }
+      }
+    }
+  },
+  "notes": [
+    "Metric definitions:",
+    "- Correctness: Is the extracted information factually accurate compared to the source?",
+    "- Latency: How quickly can the AI tool extract this information?"
+  ],
+  "examples": [
+    {
+      "id": "GC-01-C-001",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the agreement number for this contract?",
+      "contextChunk": "**Agreement Number:** CSA-2025-MFG-ST-001",
+      "expectedAnswer": "CSA-2025-MFG-ST-001",
+      "difficulty": "easy",
+      "tags": ["identifier", "metadata"]
+    },
+    {
+      "id": "GC-02-C-005",
+      "contractId": "02",
+      "metric": "Correctness",
+      "question": "What is the effective date of the contract?",
+      "contextChunk": "**Effective Date:** March 15, 2025",
+      "expectedAnswer": "March 15, 2025",
+      "difficulty": "easy",
+      "tags": ["date", "effective-date"]
+    }
+  ]
+}

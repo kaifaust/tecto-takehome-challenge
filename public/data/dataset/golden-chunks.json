@@ -1,0 +1,240 @@
+{
+  "version": "2.0.0",
+  "description": "Golden evaluation chunks for correctness metric across first 3 contracts",
+  "totalChunks": 16,
+  "chunksByMetric": {
+    "Correctness": 16,
+    "Latency": 0
+  },
+  "chunks": [
+    {
+      "id": "GC-01-C-001",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the agreement number?",
+      "contextChunk": "**Agreement Number:** CSA-2025-MFG-ST-001",
+      "expectedAnswer": "CSA-2025-MFG-ST-001",
+      "difficulty": "easy",
+      "tags": [
+        "identifier",
+        "metadata"
+      ]
+    },
+    {
+      "id": "GC-01-C-002",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the exact effective date of this contract?",
+      "contextChunk": "**Effective Date:** January 1, 2026",
+      "expectedAnswer": "January 1, 2026",
+      "difficulty": "easy",
+      "tags": [
+        "date",
+        "effective-date"
+      ]
+    },
+    {
+      "id": "GC-01-C-003",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the contract term duration?",
+      "contextChunk": "**Term:** Three (3) Years",
+      "expectedAnswer": "Three (3) Years",
+      "difficulty": "easy",
+      "tags": [
+        "term",
+        "duration"
+      ]
+    },
+    {
+      "id": "GC-01-C-004",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What are the full legal names of both parties to this agreement?",
+      "contextChunk": "**PROVIDER:**\n StratusCloud Technologies Inc.\n2500 Technology Boulevard, Suite 800\nSanta Clara, CA 95054\nUnited States of America\n\n**CUSTOMER:**\nMeridian Financial Group\nOne Meridian Plaza, 42nd Floor\nLondon EC2N 2DB\nUnited Kingdom",
+      "expectedAnswer": [
+        "StratusCloud Technologies Inc.",
+        "Meridian Financial Group"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "parties",
+        "legal-names"
+      ],
+      "notes": "Tests accurate extraction of party names without addresses or additional information"
+    },
+    {
+      "id": "GC-01-C-005",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the exact uptime SLA percentage commitment?",
+      "contextChunk": "**3.1 Uptime Commitment.** Provider guarantees **99.99% Availability** for the Covered Services during each calendar month of the Term",
+      "expectedAnswer": "99.99%",
+      "difficulty": "medium",
+      "tags": [
+        "sla",
+        "uptime",
+        "numeric"
+      ]
+    },
+    {
+      "id": "GC-01-C-006",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the Recovery Time Objective (RTO) for disaster recovery?",
+      "contextChunk": "**(a) **Recovery Time Objective (RTO):** Four (4) hours from declaration of a disaster event for Production Environment restoration to operational status.",
+      "expectedAnswer": "Four (4) hours",
+      "difficulty": "medium",
+      "tags": [
+        "disaster-recovery",
+        "rto",
+        "sla"
+      ]
+    },
+    {
+      "id": "GC-01-C-007",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the Recovery Point Objective (RPO) for transactional database systems?",
+      "contextChunk": "**(b) **Recovery Point Objective (RPO):** Fifteen (15) minutes maximum data loss for transactional database systems; one (1) hour for analytical and reporting systems.",
+      "expectedAnswer": "Fifteen (15) minutes",
+      "difficulty": "medium",
+      "tags": [
+        "disaster-recovery",
+        "rpo",
+        "sla"
+      ],
+      "notes": "Tests ability to distinguish between different RPO values for different system types"
+    },
+    {
+      "id": "GC-01-C-008",
+      "contractId": "01",
+      "metric": "Correctness",
+      "question": "What is the governing law jurisdiction for this contract?",
+      "contextChunk": "**14.4 Governing Law and Jurisdiction.** This Agreement shall be governed by and construed in accordance with the laws of England and Wales",
+      "expectedAnswer": "England and Wales",
+      "difficulty": "easy",
+      "tags": [
+        "jurisdiction",
+        "legal"
+      ]
+    },
+    {
+      "id": "GC-02-C-001",
+      "contractId": "02",
+      "metric": "Correctness",
+      "question": "What is the agreement date?",
+      "contextChunk": "**AGREEMENT DATE:** November 3, 2025",
+      "expectedAnswer": "November 3, 2025",
+      "difficulty": "easy",
+      "tags": [
+        "date",
+        "metadata"
+      ]
+    },
+    {
+      "id": "GC-02-C-002",
+      "contractId": "02",
+      "metric": "Correctness",
+      "question": "What are the full legal names of both parties?",
+      "contextChunk": "**APEX PHARMACEUTICALS LLC**\n(\"Client\" or \"Apex\")\n1847 BioScience Boulevard\nCambridge, Massachusetts 02142\n\n**AND:**\n\n**CYBERSHIELD SECURITY CONSULTANTS LTD.**\n(\"Consultant\" or \"CyberShield\")",
+      "expectedAnswer": [
+        "Apex Pharmaceuticals LLC",
+        "CyberShield Security Consultants Ltd."
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "parties",
+        "legal-names"
+      ]
+    },
+    {
+      "id": "GC-02-C-003",
+      "contractId": "02",
+      "metric": "Correctness",
+      "question": "What is the total annual fee for all services?",
+      "contextChunk": "**Total Annual Fee:** $487,500.00 USD",
+      "expectedAnswer": "$487,500.00",
+      "difficulty": "easy",
+      "tags": [
+        "financial",
+        "total-value"
+      ]
+    },
+    {
+      "id": "GC-02-C-004",
+      "contractId": "02",
+      "metric": "Correctness",
+      "question": "How many quarterly external penetration tests are required per year?",
+      "contextChunk": "Consultant shall conduct external penetration testing against Client's internet-facing infrastructure four (4) times per calendar year",
+      "expectedAnswer": "4",
+      "difficulty": "easy",
+      "tags": [
+        "scope",
+        "testing-frequency"
+      ]
+    },
+    {
+      "id": "GC-03-C-001",
+      "contractId": "03",
+      "metric": "Correctness",
+      "question": "What is the effective date of this agreement?",
+      "contextChunk": "**AGREEMENT** dated as of January 15, 2026 (\"Effective Date\")",
+      "expectedAnswer": "January 15, 2026",
+      "difficulty": "easy",
+      "tags": [
+        "date",
+        "metadata"
+      ]
+    },
+    {
+      "id": "GC-03-C-002",
+      "contractId": "03",
+      "metric": "Correctness",
+      "question": "What are the full legal names of both parties?",
+      "contextChunk": "**TECHVISTA CORPORATION**\n2400 Sand Hill Road, Suite 300\nMenlo Park, California 94025\nUnited States of America\n(\"Client\")\n\n**AND:**\n\n**GLOBALHR SOLUTIONS INC.**\n1550 Peachtree Street NE, Tower Two\nAtlanta, Georgia 30309\nUnited States of America\n(\"Provider\")",
+      "expectedAnswer": [
+        "TechVista Corporation",
+        "GlobalHR Solutions Inc."
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "parties",
+        "legal-names"
+      ]
+    },
+    {
+      "id": "GC-03-C-003",
+      "contractId": "03",
+      "metric": "Correctness",
+      "question": "How many employees does the client have according to the recitals?",
+      "contextChunk": "**WHEREAS**, Client is a software-as-a-service corporation with approximately 8,500 employees located across multiple countries",
+      "expectedAnswer": "8,500",
+      "difficulty": "easy",
+      "tags": [
+        "employee-count",
+        "scope"
+      ]
+    },
+    {
+      "id": "GC-03-C-004",
+      "contractId": "03",
+      "metric": "Correctness",
+      "question": "What are the six covered countries for payroll services?",
+      "contextChunk": "**\"Covered Countries\"** means the United States of America, Canada, United Kingdom, Germany, India, and Australia.",
+      "expectedAnswer": [
+        "United States",
+        "Canada",
+        "United Kingdom",
+        "Germany",
+        "India",
+        "Australia"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "countries",
+        "scope"
+      ]
+    }
+  ]
+}

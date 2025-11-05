@@ -5,6 +5,7 @@ import { extractaClient, azureClient } from '@/lib/api';
 import { truncateJson } from '@/lib/truncate';
 import { CONTRACTS } from '@/lib/contracts';
 import { getCachedResponse, setCachedResponse } from '@/lib/cache';
+import { getExtractaFieldDefinitions } from '@/lib/contract-schema';
 import type { APIBatchResponse, APIContractResult } from '@/types/api';
 import type { ExtractaResponse } from '@/types/services/extracta';
 import type { AzureResponse } from '@/types/services/azure';
@@ -61,74 +62,13 @@ export async function POST(request: Request) {
         result = cached.data;
         latencyMs = cached.latencyMs;
       } else {
-        // Create extraction with Q&A format fields
+        // Create extraction with Q&A format fields from centralized schema
         const extractionResponse: { extractionId: string } =
           await extractaClient.createExtraction({
             name: `Contract ${contract.id}`,
             description: 'Contract Q&A extraction for evaluation pipeline',
             language: 'English',
-            fields: [
-              {
-                key: 'contract_id',
-                type: 'string',
-                description: 'What is the contract number or agreement ID?',
-                example: 'CSA-2025-MFG-ST-001',
-              },
-              {
-                key: 'contract_title',
-                type: 'string',
-                description: 'What is the title of this contract or agreement?',
-                example: 'Cloud Services Agreement',
-              },
-              {
-                key: 'parties',
-                type: 'string',
-                description: 'Who are all the parties involved in this contract? List their full legal names.',
-                example: 'StratusCloud Technologies Inc., Meridian Financial Group',
-              },
-              {
-                key: 'effective_date',
-                type: 'string',
-                description: 'When does this contract become effective or start?',
-                example: 'January 1, 2026',
-              },
-              {
-                key: 'expiration_date',
-                type: 'string',
-                description: 'When does this contract expire or end?',
-                example: 'December 31, 2028',
-              },
-              {
-                key: 'contract_duration',
-                type: 'string',
-                description: 'What is the duration or term of this contract?',
-                example: 'Three (3) Years',
-              },
-              {
-                key: 'contract_value',
-                type: 'string',
-                description: 'What is the total value, price, or monetary amount of this contract?',
-                example: '$25,000,000',
-              },
-              {
-                key: 'subject_matter',
-                type: 'string',
-                description: 'What is the subject matter or purpose of this contract? What services or products are being provided?',
-                example: 'Cloud infrastructure and platform services',
-              },
-              {
-                key: 'governing_law',
-                type: 'string',
-                description: 'What jurisdiction or governing law applies to this contract?',
-                example: 'State of New York',
-              },
-              {
-                key: 'key_obligations',
-                type: 'string',
-                description: 'What are the key obligations or responsibilities mentioned in this contract?',
-                example: 'Provider shall ensure data remains within specified geographic regions and maintain 99.9% uptime.',
-              },
-            ],
+            fields: getExtractaFieldDefinitions(),
           });
 
         const extractionId = extractionResponse.extractionId;

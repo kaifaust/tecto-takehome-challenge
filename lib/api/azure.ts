@@ -3,14 +3,12 @@
  */
 
 import { env } from '@/lib/env';
-import { getAzureQueryFields } from '@/lib/contract-schema';
 import type { AzureResponse } from '@/types/services/azure';
 
 export class AzureDocumentIntelligenceClient {
   private readonly key: string;
   private readonly endpoint: string;
   private readonly apiVersion = '2024-11-30';
-  private readonly queryFields = getAzureQueryFields();
 
   constructor() {
     this.key = env.azure.key;
@@ -18,12 +16,13 @@ export class AzureDocumentIntelligenceClient {
   }
 
   /**
-   * Analyze a contract document from file buffer with query fields for Q&A
+   * Analyze a contract document from file buffer
+   * NOTE: Query fields don't work with prebuilt-contract model (only with prebuilt-layout)
    */
   async analyzeContractFromBuffer(
     fileBuffer: Buffer
   ): Promise<{ operationId: string; operationLocation: string }> {
-    const path = `/documentintelligence/documentModels/prebuilt-contract:analyze?api-version=${this.apiVersion}&features=queryFields&queryFields=${this.queryFields}`;
+    const path = `/documentintelligence/documentModels/prebuilt-contract:analyze?api-version=${this.apiVersion}`;
 
     const response = await fetch(`${this.endpoint}${path}`, {
       method: 'POST',

@@ -18,7 +18,7 @@ export interface ExtractaFile {
 }
 
 /**
- * Extracta.ai returns snake_case fields
+ * Extracta.ai contract data fields (PascalCase matching Azure's format)
  * We use an index signature to allow any field, as Extracta may return additional fields
  */
 export type ExtractaContractData = {

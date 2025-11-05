@@ -26,38 +26,31 @@ export interface NormalizedQA {
 // ============================================
 
 /**
- * Extract string value from Azure field (handles different field types)
+ * Extract string value from Azure field
  */
-function extractAzureFieldValue(
-  field: { valueString?: string; valueDate?: string; content?: string } | undefined
-): string | undefined {
+function extractAzureFieldValue(field: any): string | undefined {
   if (!field) return undefined;
-  return field.valueString || field.valueDate || field.content;
-}
 
-/**
- * Extract parties from Azure array field
- */
-function extractAzureParties(
-  field:
-    | {
-        type: string;
-        valueArray?: Array<{
-          valueObject?: Record<
-            string,
-            { valueString?: string; content?: string }
-          >;
-        }>;
+  // Handle array types (Parties, Jurisdictions)
+  if (field.type === 'array' && field.valueArray) {
+    const items: string[] = [];
+    for (const item of field.valueArray) {
+      if (item.type === 'object' && item.valueObject) {
+        // For Parties: extract Name field
+        if (item.valueObject.Name?.content) {
+          items.push(item.valueObject.Name.content);
+        }
+        // For Jurisdictions: extract Region field
+        if (item.valueObject.Region?.content) {
+          items.push(item.valueObject.Region.content);
+        }
       }
-    | undefined
-): string | undefined {
-  if (!field || field.type !== 'array' || !field.valueArray) return undefined;
-  const names = field.valueArray
-    .map(
-      (p) => p.valueObject?.Name?.valueString || p.valueObject?.Name?.content
-    )
-    .filter(Boolean);
-  return names.length > 0 ? names.join(', ') : undefined;
+    }
+    return items.length > 0 ? items.join(', ') : undefined;
+  }
+
+  // Handle simple string/date fields
+  return field.content || field.valueString || field.valueDate;
 }
 
 /**
@@ -77,12 +70,11 @@ export function normalizeAzureResponse(response: AzureResponse): NormalizedQA {
     const azureFieldName = AZURE_FIELD_NAMES[key];
     const azureField = fields[azureFieldName];
 
-    // Special handling for Parties (array field)
-    if (key === 'parties') {
-      answers[key] = extractAzureParties(azureField as never);
-    } else {
-      answers[key] = extractAzureFieldValue(azureField as never);
-    }
+    // Just extract the value - Azure already did the hard work
+    const value = extractAzureFieldValue(azureField as never);
+
+    // Convert undefined to null for consistent JSON serialization
+    answers[key] = value === undefined ? null : value;
   });
 
   return {
@@ -108,7 +100,10 @@ export function normalizeExtractaResponse(
   // Map each standard field using the centralized schema
   CONTRACT_FIELD_KEYS.forEach((key: ContractFieldKey) => {
     const extractaFieldName = EXTRACTA_FIELD_NAMES[key];
-    answers[key] = data[extractaFieldName];
+    const value = data[extractaFieldName];
+
+    // Convert undefined to null for consistent JSON serialization
+    answers[key] = value === undefined ? null : value;
   });
 
   return {

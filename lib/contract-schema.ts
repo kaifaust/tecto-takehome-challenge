@@ -9,27 +9,29 @@
 
 /**
  * Contract field keys used across all services
+ * LIMITED TO AZURE'S NATIVE FIELDS ONLY (for fair comparison)
+ * Azure prebuilt-contract supports these 9 fields (as of 2024-11-30 GA)
  */
 export const CONTRACT_FIELD_KEYS = [
   'contractId',
   'title',
   'parties',
   'effectiveDate',
+  'executionDate',
   'expirationDate',
   'contractDuration',
-  'contractValue',
-  'subjectMatter',
-  'governingLaw',
-  'keyObligations',
+  'renewalDate',
+  'jurisdictions',
 ] as const;
 
 export type ContractFieldKey = (typeof CONTRACT_FIELD_KEYS)[number];
 
 /**
  * Unified contract field values (camelCase for TS)
+ * Fields can be string, null (explicitly absent in source), or undefined (not yet processed)
  */
 export type ContractFields = {
-  [K in ContractFieldKey]?: string;
+  [K in ContractFieldKey]?: string | null;
 };
 
 // ============================================
@@ -37,35 +39,36 @@ export type ContractFields = {
 // ============================================
 
 /**
- * Azure Document Intelligence field names (PascalCase)
+ * Azure Document Intelligence prebuilt-contract field names (PascalCase)
+ * These are the ONLY fields that Azure's prebuilt contract model returns
  */
 export const AZURE_FIELD_NAMES: Record<ContractFieldKey, string> = {
   contractId: 'ContractId',
   title: 'Title',
   parties: 'Parties',
   effectiveDate: 'EffectiveDate',
+  executionDate: 'ExecutionDate',
   expirationDate: 'ExpirationDate',
   contractDuration: 'ContractDuration',
-  contractValue: 'ContractValue',
-  subjectMatter: 'SubjectMatter',
-  governingLaw: 'GoverningLaw',
-  keyObligations: 'KeyObligations',
+  renewalDate: 'RenewalDate',
+  jurisdictions: 'Jurisdictions',
 } as const;
 
 /**
- * Extracta.ai field names (snake_case)
+ * Extracta.ai field names to request
+ * We use simple PascalCase names matching Azure to keep them aligned
+ * Extracta will convert these to snake_case in responses (e.g., "Parties" → "parties")
  */
 export const EXTRACTA_FIELD_NAMES: Record<ContractFieldKey, string> = {
-  contractId: 'contract_id',
-  title: 'contract_title',
-  parties: 'parties',
-  effectiveDate: 'effective_date',
-  expirationDate: 'expiration_date',
-  contractDuration: 'contract_duration',
-  contractValue: 'contract_value',
-  subjectMatter: 'subject_matter',
-  governingLaw: 'governing_law',
-  keyObligations: 'key_obligations',
+  contractId: 'ContractId',
+  title: 'Title',
+  parties: 'Parties',
+  effectiveDate: 'EffectiveDate',
+  executionDate: 'ExecutionDate',
+  expirationDate: 'ExpirationDate',
+  contractDuration: 'ContractDuration',
+  renewalDate: 'RenewalDate',
+  jurisdictions: 'Jurisdictions',
 } as const;
 
 // ============================================
@@ -81,6 +84,7 @@ export function getAzureQueryFields(): string {
 
 /**
  * Get Extracta field definitions for extraction creation
+ * Descriptions must be simple and match Azure's field semantics
  */
 export function getExtractaFieldDefinitions(): Array<{
   key: string;
@@ -88,16 +92,15 @@ export function getExtractaFieldDefinitions(): Array<{
   description: string;
 }> {
   const descriptions: Record<ContractFieldKey, string> = {
-    contractId: 'Unique identifier for the contract',
-    title: 'Title of the contract',
-    parties: 'Names of all parties involved, comma-separated',
-    effectiveDate: 'Date when the contract becomes effective',
-    expirationDate: 'Date when the contract expires',
-    contractDuration: 'Duration of the contract (e.g., "2 years")',
-    contractValue: 'Total value or price of the contract',
-    subjectMatter: 'Brief description of what the contract is about',
-    governingLaw: 'Jurisdiction or law governing the contract',
-    keyObligations: 'Main obligations or responsibilities',
+    contractId: 'What is the contract ID?',
+    title: 'What is the contract title?',
+    parties: 'Who are the parties to this contract?',
+    effectiveDate: 'What is the effective date?',
+    executionDate: 'What is the execution date?',
+    expirationDate: 'What is the expiration date?',
+    contractDuration: 'What is the contract duration?',
+    renewalDate: 'What is the renewal date?',
+    jurisdictions: 'What are the jurisdictions?',
   };
 
   return CONTRACT_FIELD_KEYS.map((key) => ({

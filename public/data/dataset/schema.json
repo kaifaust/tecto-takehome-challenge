@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contract Extraction Schema",
+  "description": "Unified schema for benchmarking contract understanding AI tools (Extracta.ai and Azure Document Intelligence)",
+  "version": "1.0.0",
+  "fields": [
+    {
+      "key": "contractNumberOrAgreementId",
+      "type": "string",
+      "description": "What is the contract number or agreement ID?",
+      "required": true,
+      "examples": ["CSA-2025-MFG-ST-001", "APEX-2025-SEC-001"]
+    },
+    {
+      "key": "titleOfContractOrAgreement",
+      "type": "string",
+      "description": "What is the title of this contract or agreement?",
+      "required": true,
+      "examples": ["Cloud Services Agreement", "Master Services Agreement for Security Assessment Services"]
+    },
+    {
+      "key": "fullLegalNamesOfAllPartiesInvolved",
+      "type": "array",
+      "description": "Who are all the parties involved in this contract? List their full legal names.",
+      "required": true,
+      "examples": [
+        ["StratusCloud Technologies Inc.", "Meridian Financial Group"],
+        ["Apex Pharmaceuticals LLC", "CyberShield Security Consultants Ltd."]
+      ]
+    },
+    {
+      "key": "dateWhenContractBecomesEffectiveOrStarts",
+      "type": "string",
+      "format": "date",
+      "description": "When does this contract become effective or start? (ISO 8601 format: YYYY-MM-DD)",
+      "required": true,
+      "examples": ["2026-01-01", "2025-11-03"]
+    },
+    {
+      "key": "dateWhenContractExpiresOrEnds",
+      "type": "string",
+      "format": "date",
+      "description": "When does this contract expire or end? (ISO 8601 format: YYYY-MM-DD, or null if no fixed expiration)",
+      "required": false,
+      "examples": ["2029-01-01", "2026-12-31", null]
+    },
+    {
+      "key": "durationOrTermOfContract",
+      "type": "string",
+      "description": "What is the duration or term of this contract?",
+      "required": true,
+      "examples": ["Three (3) Years", "12 months with auto-renewal", "2 years"]
+    },
+    {
+      "key": "totalValuePriceOrMonetaryAmountOfContract",
+      "type": "object",
+      "description": "What is the total value, price, or monetary amount of this contract?",
+      "required": false,
+      "properties": {
+        "total": {
+          "type": "string",
+          "description": "Total contract value or annual value"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency code (ISO 4217)"
+        },
+        "breakdown": {
+          "type": "string",
+          "description": "Brief breakdown of major cost components"
+        }
+      },
+      "examples": [
+        {
+          "total": "$487,500.00",
+          "currency": "USD",
+          "breakdown": "Annual fee: External testing ($240k), Internal assessment ($125k), Social engineering ($45k), Web app testing ($72k), Emergency retainer ($5.5k)"
+        }
+      ]
+    },
+    {
+      "key": "subjectMatterOrPurposeOfContractAndServicesOrProductsProvided",
+      "type": "string",
+      "description": "What is the subject matter or purpose of this contract? What services or products are being provided?",
+      "required": true,
+      "examples": [
+        "Provider furnishes enterprise-grade cloud infrastructure, platform, and managed database services to Customer, a multinational banking institution.",
+        "Consultant provides security assessment services including quarterly penetration testing, annual internal assessments, and social engineering campaigns."
+      ]
+    },
+    {
+      "key": "jurisdictionOrGoverningLawApplicableToContract",
+      "type": "string",
+      "description": "What jurisdiction or governing law applies to this contract?",
+      "required": true,
+      "examples": ["England and Wales", "Commonwealth of Massachusetts", "New York State"]
+    },
+    {
+      "key": "keyObligationsOrResponsibilitiesMentionedInContract",
+      "type": "array",
+      "description": "What are the key obligations or responsibilities mentioned in this contract?",
+      "required": true,
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        [
+          "99.99% uptime SLA with tiered service credits for failures",
+          "Data residency in EU/UK and Singapore regions with GDPR compliance",
+          "RPO of 15 minutes and RTO of 4 hours for disaster recovery",
+          "Quarterly business reviews and dedicated Technical Account Manager",
+          "SOC 2 Type II, ISO 27001, and PCI DSS Level 1 compliance"
+        ]
+      ]
+    }
+  ],
+  "notes": [
+    "This schema is designed for short (1-2 page) contract excerpts",
+    "All dates should be normalized to ISO 8601 format (YYYY-MM-DD)",
+    "Parties should be listed as they appear in the contract (full legal names)",
+    "Key obligations should capture the most critical terms and SLAs"
+  ]
+}
